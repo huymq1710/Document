@@ -1,0 +1,156 @@
+A51 MACRO ASSEMBLER  MAIN                                                                 04/30/2020 23:44:37 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02
+OBJECT MODULE PLACED IN main.OBJ
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE main.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     ;=================================================================
+                       2     ;NGO LAM TRUNG 2020
+                       3     ;Skeleton code for external interrupts ISR
+                       4     ;=================================================================
+                       5     ;Common Anode 7SEG-LED numbers
+  0040                 6     NUM_0 EQU 40h ; code to display 0 on 7 segment
+  0079                 7     NUM_1 EQU 79h ; code to display 1 on 7 segment
+  0024                 8     NUM_2 EQU 24h ; code to display 2 on 7 segment
+  0030                 9     NUM_3 EQU 30h ; code to display 3 on 7 segment
+  0019                10     NUM_4 EQU 19h ; code to display 4 on 7 segment
+  0012                11     NUM_5 EQU 12h ; code to display 0 on 7 segment
+  0002                12     NUM_6 EQU 02h ; code to display 1 on 7 segment
+  0078                13     NUM_7 EQU 78h ; code to display 2 on 7 segment
+  0000                14     NUM_8 EQU 00h ; code to display 3 on 7 segment
+  0010                15     NUM_9 EQU 10h ; code to display 4 on 7 segment
+                      16     ;Variable
+  0040                17     LED_DATA EQU 0x40
+                      18     ;Interrupt table
+0000                  19     ORG 0000h               ; entry address for 8051 RESET
+0000 020100           20             LJMP MAIN       ; move MAIN away from interrupt vector table
+0003                  21     ORG 0003h               ; vector address for interrupt 0
+0003 02014D           22             LJMP ISR0       ; jump to ISR0
+0013                  23     ORG 0013h               ; vector address for interrupt 1
+0013 02014F           24             LJMP ISR1       ; jump to ISR1
+                      25     ;=================================================================
+                      26     ;Code segment
+                      27     ;=================================================================
+0100                  28     ORG 0100h                               ; MAIN starts here
+0100                  29     MAIN:
+0100 75A885           30             MOV IE, #10000101B      ; enable external interrupts IE0, IE1
+0103 D288             31             SETB IT0                        ; negative edge trigger for interrupt 0
+0105 D28A             32             SETB IT1                        ; negative edge trigger for interrupt 1
+0107 7800             33             MOV R0, #0                      ;Trang thai htai dèn, bd R0=0
+0109 754040           34             MOV 40h, #NUM_0         ;dat o dia chi 40h o trong RAM : dua gtri NUM_0 vao dia chi
+                              40 
+010C 754179           35             MOV 41h, #NUM_1                         ; NUM_x có giá tri o bang giá tri line 6->1
+                             5
+010F 754224           36             MOV 42h, #NUM_2
+0112 754330           37             MOV 43h, #NUM_3
+0115 754419           38             MOV 44h, #NUM_4
+0118 754512           39             MOV 45h, #NUM_5
+011B 754602           40             MOV 46h, #NUM_6
+011E 754778           41             MOV 47h, #NUM_7
+0121 754800           42             MOV 48h, #NUM_8
+0124 754910           43             MOV 49h, #NUM_9
+                      44     ;Code 45-56: TH sô <0 hay >9 thi ko thuc hien nua, khó vì 8051 ko co lenh so sánh ( 8086 có
+                              lênh so sánh CMP)
+0127                  45     LOOP:
+0127 E8               46             MOV A, R0                       ; move data to A
+                      47             ; Ktr A=R0 có < 0 
+                      48             ; (vi dây la sô ko dâu => 0 - 1 =255 ) => Ktr bit cao nhât =1 hay =0
+0128 33               49             RLC A                           ; Lenh quay trái toàn bô bit cua A, bit cao nhât cu
+                             a A vào C
+0129 5004             50             JNC BIGGER10            ; JNC : Nhay neu co Carry C=0
+                      51                                                     ;Neu C=0 => bit cao nhat cua A=0 => A>0 : K
+                             iem tra tiep o nhan BIGGER10 TH A>10
+                      52                                                     ;Neu C=1 => A<0 => JNC ko thuc hien, xuong 
+                             duoi hien thi 0
+A51 MACRO ASSEMBLER  MAIN                                                                 04/30/2020 23:44:37 PAGE     2
+
+012B 7800             53             MOV R0, #0                      ; Khi dó A<0, set no tro lai ve 0  và xuông duoi hi
+                             en thi
+012D 8008             54             JMP DISPLAY
+                      55     ;line 56-61: So sanh >10 ?
+012F                  56     BIGGER10:
+012F E8               57             MOV A, R0                       ; move data to A
+0130 C3               58             CLR C
+0131 940A             59             SUBB A, #10                      ; A-10 ( phai clear C=0 o line 58 )
+0133 4002             60             JC DISPLAY                      ; neu A<10 khi tru ben line 59 có muon co C     => 
+                             C=1 => JC nhay xuong lenh day ma ko thuc hien nó
+0135 7809             61             MOV R0, #9                      ; reset to 9
+0137                  62     DISPLAY:                         ;Code duoi, Tu R0: hien thi dlieu ra ngoai , sd lookup tab
+                             le bên trên 34-43
+                      63                                             ;=> chi can lay gtri o dia chi (R0+40h) la biet de 
+                             hien sô nào
+0137 E8               64             MOV A, R0               ;Bien tam A=R0
+0138 4440             65             ORL A, #40h             ; A= R0+40h       ; ORL lenh OR vi gtri A:0-9
+013A F9               66             MOV R1, A               ;R1=dia chi so can hien
+013B 8780             67             MOV P0, @R1             ;P0=gtr dia chi o R1 de hien
+013D 3142             68             CALL DELAY_1MS
+013F 020127           69             LJMP LOOP                               ; end loop 
+                      70     ;============================================================
+                      71     ; ONE_MILLI_SUB
+                      72     ; Subroutine to delay ONE millisecond
+                      73     ; Uses and preserves R7
+                      74     ;============================================================
+0142                  75     DELAY_1MS:
+0142 C007             76             PUSH 07h                                ; save R7 to stack
+0144 7FFA             77             MOV R7, #250d                   ; 
+0146                  78     LOOP_1_MILLI:                           ; loops 250 times
+0146 00               79             NOP                                     ; two NOPs
+0147 00               80             NOP                                     ;
+0148 DFFC             81             DJNZ R7, LOOP_1_MILLI   ; loop until zero
+014A D007             82             POP 07h                                 ; restore R7 
+014C 22               83             RET                                     ; return to caller
+                      84     ;==================================================================
+                      85     ; ISR0                                          Thanh Ghi R0 nhiem vu luu trang thái hien t
+                             ai biên dêm
+                      86     ;==================================================================
+014D                  87     ISR0:                     ;chuc nang tang bien dem
+014D 08               88             INC  R0                                 ; Increase data
+014E 32               89             RETI                                    ; return from interrupt
+                      90     ;==================================================================
+                      91     ; ISR1 
+                      92     ;==================================================================
+014F                  93     ISR1:                     ;chuc nang giam bien dem
+014F 18               94             DEC R0                                  ; decrease value
+0150 32               95             RETI                                    ; return from interrupt
+                      96     ;==================================================================
+                      97     END                                             ; end of program
+A51 MACRO ASSEMBLER  MAIN                                                                 04/30/2020 23:44:37 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+BIGGER10 . . . . .  C ADDR   012FH   A   
+DELAY_1MS. . . . .  C ADDR   0142H   A   
+DISPLAY. . . . . .  C ADDR   0137H   A   
+IE . . . . . . . .  D ADDR   00A8H   A   
+ISR0 . . . . . . .  C ADDR   014DH   A   
+ISR1 . . . . . . .  C ADDR   014FH   A   
+IT0. . . . . . . .  B ADDR   0088H.0 A   
+IT1. . . . . . . .  B ADDR   0088H.2 A   
+LED_DATA . . . . .  N NUMB   0040H   A   
+LOOP . . . . . . .  C ADDR   0127H   A   
+LOOP_1_MILLI . . .  C ADDR   0146H   A   
+MAIN . . . . . . .  C ADDR   0100H   A   
+NUM_0. . . . . . .  N NUMB   0040H   A   
+NUM_1. . . . . . .  N NUMB   0079H   A   
+NUM_2. . . . . . .  N NUMB   0024H   A   
+NUM_3. . . . . . .  N NUMB   0030H   A   
+NUM_4. . . . . . .  N NUMB   0019H   A   
+NUM_5. . . . . . .  N NUMB   0012H   A   
+NUM_6. . . . . . .  N NUMB   0002H   A   
+NUM_7. . . . . . .  N NUMB   0078H   A   
+NUM_8. . . . . . .  N NUMB   0000H   A   
+NUM_9. . . . . . .  N NUMB   0010H   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

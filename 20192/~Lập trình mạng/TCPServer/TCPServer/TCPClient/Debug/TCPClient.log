@@ -1,0 +1,4 @@
+﻿  TCPClient.cpp
+E:\1_tailieuBK\20192\Lập trình mạng\TCPServer\TCPServer\TCPClient\TCPClient.cpp(21,9): error C3861: 'gets': identifier not found
+E:\1_tailieuBK\20192\Lập trình mạng\TCPServer\TCPServer\TCPClient\TCPClient.cpp(14,1): error C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\WinSock2.h(1831): message : see declaration of 'inet_addr'

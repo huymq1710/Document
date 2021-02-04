@@ -1,0 +1,67 @@
+A51 MACRO ASSEMBLER  MAIN                                                                 04/15/2020 15:33:36 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02
+OBJECT MODULE PLACED IN main.OBJ
+ASSEMBLER INVOKED BY: C:\Tools\Keil\C51\BIN\A51.EXE main.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     ;=================================================================
+                       2     ;NGO LAM TRUNG 2020
+                       3     ;Skeleton code for external interrupts ISR
+                       4     ;=================================================================
+                       5     ;Interrupt table
+0000                   6     ORG 0000h               ; entry address for 8051 RESET
+0000 020100            7             LJMP MAIN       ; move MAIN away from interrupt vector table
+0003                   8     ORG 0003h               ; vector address for interrupt 0
+0003 02010C            9             LJMP ISR0       ; jump to ISR0
+0013                  10     ORG 0013h               ; vector address for interrupt 1
+0013 02010F           11             LJMP ISR1       ; jump to ISR1
+                      12     ;=================================================================
+                      13     ;Code segment
+                      14     ;=================================================================
+0100                  15     ORG 0100h                               ; MAIN starts here
+0100                  16     MAIN:
+0100 75A885           17             MOV  IE, #10000101B ; enable external interrupts IE0, IE1
+0103 D288             18             SETB IT0                        ; negative edge trigger for interrupt 0
+0105 D28A             19             SETB IT1                        ; negative edge trigger for interrupt 1
+0107 C287             20             CLR  P0.7                       ; LED ON
+0109                  21     LOOP:
+0109 020109           22             LJMP LOOP                       ; end loop 
+                      23     ;==================================================================
+                      24     ; ISR0 
+                      25     ;==================================================================
+010C                  26     ISR0:
+010C D287             27             SETB P0.7                       ; LED ON
+010E 32               28             RETI                            ; return from interrupt
+                      29     ;==================================================================
+                      30     ; ISR1 
+                      31     ;==================================================================
+010F                  32     ISR1:
+010F C287             33             CLR P0.7                        ; LED OFF
+0111 32               34             RETI                            ; return from interrupt
+                      35     ;==================================================================
+                      36     END                                     ; end of program
+A51 MACRO ASSEMBLER  MAIN                                                                 04/15/2020 15:33:36 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+IE . . . . . . . .  D ADDR   00A8H   A   
+ISR0 . . . . . . .  C ADDR   010CH   A   
+ISR1 . . . . . . .  C ADDR   010FH   A   
+IT0. . . . . . . .  B ADDR   0088H.0 A   
+IT1. . . . . . . .  B ADDR   0088H.2 A   
+LOOP . . . . . . .  C ADDR   0109H   A   
+MAIN . . . . . . .  C ADDR   0100H   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

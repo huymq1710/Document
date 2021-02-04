@@ -1,0 +1,327 @@
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+// AsyncSelect Example.cpp : Defines the entry point for the application.
+//
+
+#include "framework.h"
+#include "AsyncSelect Example.h"
+#include <WinSock2.h>
+#include <stdio.h>
+
+#define MAX_LOADSTRING 100
+#define WM_ACCEPT WM_USER + 1
+#define WM_READ_CLOSE WM_USER + 2
+#define WM_DISCONNECT WM_USER + 3
+
+// Global Variables:
+HINSTANCE hInst;                                // current instance
+WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
+WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+
+// Forward declarations of functions included in this code module:
+ATOM                MyRegisterClass(HINSTANCE hInstance);
+BOOL                InitInstance(HINSTANCE, int);
+LRESULT CALLBACK    MyWndProc(HWND, UINT, WPARAM, LPARAM);
+INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+SOCKET s, data;
+HWND hWnd;
+SOCKET clients[1024];
+int status[1024]; //0 neu da disconnect, 1 neu van dang connect
+int count = 0;
+
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
+                     _In_opt_ HINSTANCE hPrevInstance,
+                     _In_ LPWSTR    lpCmdLine,
+                     _In_ int       nCmdShow)
+{
+    UNREFERENCED_PARAMETER(hPrevInstance);
+    UNREFERENCED_PARAMETER(lpCmdLine);
+
+    // TODO: Place code here.
+
+    // Initialize global strings
+    LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+    LoadStringW(hInstance, IDC_ASYNCSELECTEXAMPLE, szWindowClass, MAX_LOADSTRING);
+    MyRegisterClass(hInstance);
+
+    // Perform application initialization:
+    if (!InitInstance (hInstance, nCmdShow))
+    {
+        return FALSE;
+    }
+    WSADATA DATA;
+    WSAStartup(MAKEWORD(2, 2), &DATA);
+
+    s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    SOCKADDR_IN saddr;
+    saddr.sin_family = AF_INET;
+    saddr.sin_port = htons(21);
+    saddr.sin_addr.S_un.S_addr = 0;
+    bind(s, (sockaddr*)&saddr, sizeof(saddr));
+    listen(s, 10);
+    WSAAsyncSelect(s, hWnd, WM_ACCEPT, FD_ACCEPT); //Sau lenh nay thi moi ket noi den ma can accept se lam phat sinh mot su kien vao cua so voi ma 1234
+
+    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_ASYNCSELECTEXAMPLE));
+
+    MSG msg;
+
+    // Main message loop:
+    while (GetMessage(&msg, nullptr, 0, 0))
+    {
+        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+    }
+
+    return (int) msg.wParam;
+}
+
+
+
+//
+//  FUNCTION: MyRegisterClass()
+//
+//  PURPOSE: Registers the window class.
+//
+ATOM MyRegisterClass(HINSTANCE hInstance)
+{
+    WNDCLASSEXW wcex;
+
+    wcex.cbSize = sizeof(WNDCLASSEX);
+
+    wcex.style          = CS_HREDRAW | CS_VREDRAW;
+    wcex.lpfnWndProc    = MyWndProc; //Dia chi cua ham se duoc goi ra de xu ly cac su kien phat sinh tren cua so
+    wcex.cbClsExtra     = 0;
+    wcex.cbWndExtra     = 0;
+    wcex.hInstance      = hInstance;
+    wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ASYNCSELECTEXAMPLE));
+    wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
+    wcex.hbrBackground  = (HBRUSH)(COLOR_WINDOW+1);
+    wcex.lpszMenuName   = MAKEINTRESOURCEW(IDC_ASYNCSELECTEXAMPLE);
+    wcex.lpszClassName  = szWindowClass;
+    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
+
+    return RegisterClassExW(&wcex);
+}
+
+//
+//   FUNCTION: InitInstance(HINSTANCE, int)
+//
+//   PURPOSE: Saves instance handle and creates main window
+//
+//   COMMENTS:
+//
+//        In this function, we save the instance handle in a global variable and
+//        create and display the main program window.
+//
+BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
+{
+   hInst = hInstance; // Store instance handle in our global variable
+
+   hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+
+   if (!hWnd)
+   {
+      return FALSE;
+   }
+
+   ShowWindow(hWnd, nCmdShow);
+   UpdateWindow(hWnd);
+
+   return TRUE;
+}
+
+//
+//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
+//
+//  PURPOSE: Processes messages for the main window.
+//
+//  WM_COMMAND  - process the application menu
+//  WM_PAINT    - Paint the main window
+//  WM_DESTROY  - post a quit message and return
+//
+//
+LRESULT CALLBACK MyWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    SOCKET s, c;
+    SOCKADDR_IN caddr;
+    int clen = sizeof(caddr);
+    char buffer[1024];
+    switch (message)
+    {
+    case WM_READ_CLOSE:
+        c = (SOCKET)wParam;
+        if (LOWORD(lParam) & FD_READ)
+        {
+            memset(buffer, 0, sizeof(buffer));
+            recv(c, buffer, sizeof(buffer), 0);
+for (int i = 0; i < count; i++) {
+                if (clients[i] != c && status[i] == 1) {
+                    send(clients[i], buffer, strlen(buffer), 0);
+                }
+            }
+            if (strstr(buffer, "USER"))
+            {
+                char* tmp = (char*)"331 Can password\r\n";
+                send(c, tmp, strlen(tmp), 0);
+            }
+            if (strstr(buffer, "PASS"))
+            {
+                char* tmp = (char*)"230 Login ngon roi\r\n";
+                send(c, tmp, strlen(tmp), 0);
+            }
+            if (strstr(buffer, "SYST"))
+            {
+                char* tmp = (char*)"215 FTP CUA VINH\r\n";
+                send(c, tmp, strlen(tmp), 0);
+            }
+            if (strstr(buffer, "FEAT"))
+            {
+                char* tmp = (char*)"211-Features:\r\nMDTM\r\nREST STREAM\r\nSIZE\r\nMLST type*; size*; modify*;\r\nMLSD\r\nUTF8\r\nCLNT\r\nMFMT\r\nEPSV\r\nEPRT\r\n211 End\r\n";
+                send(c, tmp, strlen(tmp), 0);
+            }
+            if (strstr(buffer, "CLNT"))
+            {
+                char* tmp = (char*)"200 Khong can biet cai nay lam gi\r\n";
+                send(c, tmp, strlen(tmp), 0);
+            }
+            if (strstr(buffer, "OPTS"))
+            {
+                char* tmp = (char*)"202 OK chap nhan truyen du lieu kieu nay\r\n";
+                send(c, tmp, strlen(tmp), 0);
+            }
+            if (strstr(buffer, "PWD"))
+            {
+                char* tmp = (char*)"257 \"/\" is current directory.\r\n";
+                send(c, tmp, strlen(tmp), 0);
+            }
+            if (strstr(buffer, "TYPE"))
+            {
+                char* tmp = (char*)"200 OK\r\n";
+                send(c, tmp, strlen(tmp), 0);
+            }
+            if (strstr(buffer, "PORT"))
+            {
+                char* tmp = (char*)"200 OK\r\n";
+                send(c, tmp, strlen(tmp), 0);
+                for (int i = 0; i < strlen(buffer); i++)
+                {
+                    if (buffer[i] == ',') buffer[i] = ' ';
+                }
+                char port[1024];
+                char ip1[1024], ip2[1024], ip3[1024], ip4[1024], p1[1024], p2[1024];
+                sscanf(buffer, "%s%s%s%s%s%s%s", port, ip1, ip2, ip3, ip4, p1, p2);
+                short uport = atoi(p1) * 256 + atoi(p2);
+                data = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+                SOCKADDR_IN caddr;
+                caddr.sin_family = AF_INET;
+                caddr.sin_port = htons(uport);
+                caddr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
+                connect(data, (sockaddr*)&caddr, sizeof(caddr));
+            }
+            if (strstr(buffer, "MLSD"))
+            {
+                char* tmp = (char*)"200 OK\r\n";
+                send(c, tmp, strlen(tmp), 0);
+            }
+            if (strstr(buffer, "LIST"))
+            {
+                char* tmp = (char*)"150 Opening\r\n";
+                send(c, tmp, strlen(tmp), 0);
+                char* tmp1 = (char*)"type=dir;modify=20200421102857; .NET\r\n";
+                send(data, tmp1, strlen(tmp1), 0);
+                closesocket(data);
+                char* tmp2 = (char*)"226 Successfully transferred \"/\"\r\n";
+                send(c, tmp2, strlen(tmp2), 0);
+                //Tra ve noi dung thu muc tren kenh du lieu (data) da duoc thong bao o lenh PORT
+            }
+        }
+        if (LOWORD(lParam) & FD_CLOSE)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                if (clients[i] == c)
+                {
+                    status[i] = 0; //Kenh nay da disconnect
+                    break;
+                }
+            }
+            char* msg = (char*)"Da co mot client roi room\n";
+            for (int i = 0; i < count; i++)
+            {
+                if (clients[i] != c && status[i] == 1) //Chi gui cho cac client dang ket noi
+                {
+                    send(clients[i], msg, strlen(msg), 0);
+                }
+            }
+        }
+        break;
+    case WM_ACCEPT:
+        s = (SOCKET)wParam;
+        c = accept(s, (sockaddr*)&caddr, &clen);
+        {
+            char* tmp = (char*)"220 READY\r\n";
+            send(c, tmp, strlen(tmp), 0);
+            clients[count] = c;
+            status[count] = 1;
+            count += 1;
+            WSAAsyncSelect(c, hWnd, WM_READ_CLOSE, FD_READ | FD_CLOSE); //Sau lenh nay neu co du lieu tren socket c thi cua so se nhan duoc thong diep WM_READ
+        }
+        break;
+    case WM_COMMAND:
+        {
+            int wmId = LOWORD(wParam);
+            // Parse the menu selections:
+            switch (wmId)
+            {
+            case IDM_ABOUT:
+                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+                break;
+            case IDM_EXIT:
+                DestroyWindow(hWnd);
+                break;
+            default:
+                return DefWindowProc(hWnd, message, wParam, lParam);
+            }
+        }
+        break;
+    case WM_PAINT:
+        {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hWnd, &ps);
+            // TODO: Add any drawing code that uses hdc here...
+            EndPaint(hWnd, &ps);
+        }
+        break;
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        break;
+    default:
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    return 0;
+}
+
+// Message handler for about box.
+INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    UNREFERENCED_PARAMETER(lParam);
+    switch (message)
+    {
+    case WM_INITDIALOG:
+        return (INT_PTR)TRUE;
+
+    case WM_COMMAND:
+        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+        {
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        }
+        break;
+    }
+    return (INT_PTR)FALSE;
+}

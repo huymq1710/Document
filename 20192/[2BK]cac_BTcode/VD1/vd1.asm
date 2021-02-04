@@ -1,0 +1,4 @@
+		ORG 000
+		MOV A, 01H
+LOOP:	SJMP LOOP
+		END

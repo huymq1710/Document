@@ -1,0 +1,1 @@
+;Bai 2: thay den LED trong bt1 thanh LED 7 thanh, nút bam ON/OFF ->Tang/giam so hien

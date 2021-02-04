@@ -1,0 +1,12 @@
+﻿  TelnetServer.cpp
+E:\1_tailieuBK\20192\Lập trình mạng\TelnetServer\TelnetServer\TelnetServer.cpp(105,1): warning C4326: return type of 'main' should be 'int' instead of 'void'
+TelnetServer.obj : error LNK2019: unresolved external symbol __imp__accept@12 referenced in function _main
+TelnetServer.obj : error LNK2019: unresolved external symbol __imp__bind@12 referenced in function _main
+TelnetServer.obj : error LNK2019: unresolved external symbol __imp__closesocket@4 referenced in function "unsigned long __stdcall ClientThread(void *)" (?ClientThread@@YGKPAX@Z)
+TelnetServer.obj : error LNK2019: unresolved external symbol __imp__htons@4 referenced in function _main
+TelnetServer.obj : error LNK2019: unresolved external symbol __imp__listen@8 referenced in function _main
+TelnetServer.obj : error LNK2019: unresolved external symbol __imp__recv@16 referenced in function "unsigned long __stdcall ClientThread(void *)" (?ClientThread@@YGKPAX@Z)
+TelnetServer.obj : error LNK2019: unresolved external symbol __imp__send@16 referenced in function "unsigned long __stdcall ClientThread(void *)" (?ClientThread@@YGKPAX@Z)
+TelnetServer.obj : error LNK2019: unresolved external symbol __imp__socket@12 referenced in function _main
+TelnetServer.obj : error LNK2019: unresolved external symbol __imp__WSAStartup@8 referenced in function _main
+E:\1_tailieuBK\20192\Lập trình mạng\TelnetServer\Debug\TelnetServer.exe : fatal error LNK1120: 9 unresolved externals

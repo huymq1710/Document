@@ -1,0 +1,11 @@
+
+- Mo file FILE code bang keil. Bam F7 chay ctr sinh ra file .hex
+
+
+- Mo Proteus file ExtInterupt 7 SEG
+
+double click vao mach: Phan Program File tìm chon den file VD2.hex 
+
+- Bam mui ten tam giac góc duoi Protues de chay
+
+(De xem cach import chay 1 ctr: Xem record 8/4 )

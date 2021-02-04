@@ -1,0 +1,33 @@
+;Ghep noi nút bam: Lap trinh ctr cho phép dk LED On/off
+
+;Interrupt table
+ORG 0000h		; entry address for 8051 RESET
+	LJMP MAIN	; move MAIN away from interrupt vector table
+ORG 0003h		; vector address for interrupt 0
+	LJMP ISR0	; jump to ISR0
+ORG 0013h		; vector address for interrupt 1
+	LJMP ISR1	; jump to ISR1
+ORG 0100h		; MAIN starts here
+;Neu ko co ngat gi xay ra
+MAIN:
+	MOV IE, #10000101B		; enable external interrupts IE0, IE1	 (xem cac bit thanh IE, slide T15.8/4
+	;IE thanh ghi dk cam/cho phep ngat, o day cho phep ngat IE0,1 và dong thoi cho phep ngat tong ( 1 o dau)
+	SETB IT0				; negative edge trigger for interrupt 0
+	SETB IT1				; negative edge trigger for interrupt 1
+	;dat che do ngat theo suon am
+	CLR P0.7				; LED ON
+LOOP:
+	LJMP LOOP				; end loop	den khi nguoi dung bam 1 nút
+;==================================================================
+; ISR0
+;==================================================================
+ISR0:
+	SETB P0.7	; LED ON
+	RETI					; return from interrupt
+;==================================================================
+; ISR1
+;==================================================================
+ISR1:
+	CLR P0.7				; LED OFF
+	RETI					; return from interrupt
+END							; end of program

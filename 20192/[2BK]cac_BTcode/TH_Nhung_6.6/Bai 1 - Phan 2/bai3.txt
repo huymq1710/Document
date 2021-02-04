@@ -1,0 +1,135 @@
+
+#include "reg51.h"
+
+//global variables:
+code unsigned char table[]=
+			{0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90};
+					//led 7-seg output data 0-9 
+
+unsigned char l_posit=0;	//choose led 7-seg position	
+unsigned char oldkey=0xff;	//push button data (release status)
+int dem = 0;
+int ldata = 0;
+
+sbit led = P2^0;
+
+//Define led 7-seg anot control (on/off):	
+sbit SMG_q = P1^0;	//Led 7-seg 1 anot 
+sbit SMG_b = P1^1;	//Led 7-seg 2 anot
+sbit SMG_s = P1^2;	//Led 7-seg 3 anot
+sbit SMG_g = P1^3;	//Led 7-seg 4 anot
+
+//Buzzer (speaker) connects on P1^5 
+sbit SPK  = P1^5;	//Buzzer on/off
+//Relay connects on P1^4
+sbit JDQ  = P1^4;	//Relay on/off
+
+//Define 6 push buttons on Port P3
+sbit key1 = P3^7;	//Push button 1
+sbit key2 = P3^6;	//Push button 2
+sbit key3 = P3^5;	//Push button 3
+sbit key4 = P3^4;	//Push button 4
+sbit key5 = P3^3;	//Push button 5
+sbit key6 = P3^2;	//Push button 6
+			
+/***************/
+//Delay 0-65536
+void delay(unsigned int time)   
+{							    
+	while(time--);
+}
+
+void INT_Timer0()interrupt 1
+{
+	dem++;
+	TH0 = 0xEC;
+	TL0 = 0x78;	
+	if(dem == 200)
+	{
+		ldata++;
+		if(ldata == 100)
+		{
+			ldata = 0;
+		}
+		dem = 0;
+	}
+}										  
+/***************/
+/* Display led 7 segment
+Port P0 connects 4 led 7 segment (LED 4*8)
+P0^0->P0^7 = ABCDEFGH
+P1^0->P1^3 = Anot 1->4
+*/
+void display(unsigned int da)
+{
+	int a, b;
+
+	SMG_q=1;
+		SMG_b=1;	
+		SMG_s=1;		
+		SMG_g=1;
+
+	a = da / 10;
+	b = da % 10;
+	//P0=0XFF;
+	delay(100);			//Port 0 data off
+	da=da%10000;	 	//output data for led 7-seg (4-digits)
+	//da1=da/10;
+	switch(l_posit){
+	case 0:		//choose led 7-seg 1
+		SMG_q=0;
+		SMG_b=1;	
+		SMG_s=1;		
+		SMG_g=1;
+		//P0=table[da%10];	//Chu so hang nghin
+		P0=table[0];	//Chu so hang nghin
+		break;
+	case 1:		//choose led 7-seg 2
+		SMG_q=1;
+		SMG_b=0;	
+		SMG_s=1;		
+		SMG_g=1;
+		//P0=table[(da/10)%10]; //Chu so hang tram
+	  P0=table[0]; //Chu so hang tram
+		break;
+	case 2:		//choose led 7-seg 3
+		SMG_q=1;
+		SMG_b=1;	
+		SMG_s=0;		
+		SMG_g=1;
+	    P0=table[a];
+		//P0=table[0];  //Chu so hang chuc
+		break;
+	case 3:		//choose led 7-seg 4
+		SMG_q=1;
+		SMG_b=1;	
+		SMG_s=1;		
+		SMG_g=0;
+	    P0=table[b];
+//		P0=table[0];	 //Chu so hang don vi
+		break;
+	}
+	delay(200);
+	l_posit++;		//turn around
+	if(l_posit>3)
+		l_posit=0;	
+}
+
+//Chuong trinh chinh				
+void main(void) 
+{
+
+	// Cau hinh timer0, mode 16bit
+	TMOD = 0x01;
+	TH0 = 0xEC;
+	TL0 = 0x78;
+	TR0 = 1;
+	ET0 = 1;
+	EA = 1;
+	
+	while(1){					//loop forever
+		
+		display(ldata);		//display 4 digits led 7-seg
+
+	}
+}

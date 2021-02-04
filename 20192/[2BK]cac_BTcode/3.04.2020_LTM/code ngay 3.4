@@ -1,0 +1,87 @@
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <iostream>
+#include <WinSock2.h>
+
+char g_html[1024];
+//Ham quet toan bo Folder dc gioi han trong tham so path va tao ra 1 xau html de tra ve
+void ScanFolder(char* path, char* html) {
+	
+	WIN32_FIND_DATAA DATA;
+	HANDLE hFind = FindFirstFileA(path, &DATA);  //lam viet vs ki tu ascii tra ve 1 con tro 
+
+	if (DATA.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) { //phn biet folder vs file
+		sprintf(html, "<a href=\"%s\"><b>%s</b></a><br>", DATA.cFileName,DATA.cFileName); //folder
+	}
+	else {
+		sprintf(html, "<a href=\"%s\">%s</a><br>", DATA.cFileName,DATA.cFileName); //file
+	}
+
+	
+	if (hFind != INVALID_HANDLE_VALUE) { //khi ma van con file de doc
+		while (FindNextFileA(hFind, &DATA) == TRUE) {
+			if (DATA.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) { //phn biet folder vs file
+				sprintf(html + strlen(html), "<a href=\"%s\"><b>%s</b></a><br>", DATA.cFileName,DATA.cFileName); //ghep noi folder tim dc vao html (sau co the them the de trang tri)
+			}
+			else {
+				sprintf(html + strlen(html), "<a href=\"%s\">%s</a><br>", DATA.cFileName,DATA.cFileName); //ghep noi file tim dc vao html (sau co the them the de trang tri)
+			}
+		
+		}
+	}
+
+}
+
+
+DWORD WINAPI ClientThread(LPVOID param) {
+	SOCKET c = (SOCKET)param;
+	char buffer[1024];
+	//char* html =(char*) "<html><B>Simple HTTP File Server </B></html>";
+	char* header = (char*)"HTTP/1.1 200 OK\nServer: LTM\nContent-Type: text/html\n\n"; //khi đúng dạng giao thức, sẽ chạy trên đc Chrome
+	memset(buffer, 0, sizeof(buffer));
+	recv(c, buffer, sizeof(buffer), 0);
+	send(c, header,strlen(header),0);
+	memset(g_html, 0, sizeof(g_html));
+	sprintf(g_html, "<html><h1>SIMPLE FILE SERVER</h1><br>");
+	char ACTION[1024];
+	char PATH[1024];
+	char VER[1024];
+	memset(ACTION, 0, sizeof(ACTION));
+	memset(PATH, 0, sizeof(PATH));
+	memset(VER, 0, sizeof(VER));
+	sscanf(buffer, "%s%s%s", ACTION, PATH, VER);
+	char RealPath[1024];
+	memset(RealPath, 0, sizeof(RealPath));
+	sprintf(RealPath, "C:%s\\*.*", PATH);
+	ScanFolder(RealPath, g_html + strlen(g_html));
+	sprintf(g_html + strlen(g_html), "</html>");
+	//send(c, html, strlen(html), 0);
+	send(c, g_html, strlen(g_html),0 );
+	closesocket(c); //giao thuc http yeu cau dong ket noi khi ket thuc gui du lieu
+	return 0;
+}
+void main()
+{
+	WSADATA data;
+	WSAStartup(MAKEWORD(2, 2), &data);
+	SOCKET s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+	struct sockaddr_in saddr;
+	saddr.sin_family = AF_INET;
+	saddr.sin_port = htons(8888);
+	saddr.sin_addr.S_un.S_addr = 0;  //htons(INADDR_ANY)
+	bind(s, (sockaddr*)&saddr, sizeof(saddr));
+	listen(s, 10);
+	//tach luong de phuc vu nhieu client
+	while (0 == 0) {
+		DWORD ID = 0;
+		SOCKADDR_IN caddr;
+		int clen=sizeof(caddr); //vua la bien ra, vua la so bike toi da co the chua o duoi
+		//neu khai bao moi clen, clen se =0 va thanh vung nho ko the ghi => loi
+		SOCKET c = accept(s, (sockaddr*)&clen, &clen);
+		CreateThread(NULL, 0, ClientThread, (LPVOID)c,0, &ID); //xem lai record:phut 52 neu muon truyen nhieu hon tham so ngoai c
+
+	}
+
+}
+

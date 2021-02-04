@@ -1,0 +1,211 @@
+A51 MACRO ASSEMBLER  MAIN                                                                 05/02/2020 12:09:35 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02
+OBJECT MODULE PLACED IN main.OBJ
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE main.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     
+  0040                 2     NUM_0 EQU 40h ; code to display 0 on 7 segment
+  0079                 3     NUM_1 EQU 79h ; code to display 1 on 7 segment
+  0024                 4     NUM_2 EQU 24h ; code to display 2 on 7 segment
+  0030                 5     NUM_3 EQU 30h ; code to display 3 on 7 segment
+  0019                 6     NUM_4 EQU 19h ; code to display 4 on 7 segment
+  0012                 7     NUM_5 EQU 12h ; code to display 0 on 7 segment
+  0002                 8     NUM_6 EQU 02h ; code to display 1 on 7 segment
+  0078                 9     NUM_7 EQU 78h ; code to display 2 on 7 segment
+  0000                10     NUM_8 EQU 00h ; code to display 3 on 7 segment
+  0010                11     NUM_9 EQU 10h ; code to display 4 on 7 segment
+                      12     ;Variable
+  0040                13     LED_DATA EQU 0x40
+                      14     ;Interrupt table
+0000                  15     ORG 0000h               ; entry address for 8051 RESET
+0000 020100           16             LJMP MAIN       ; move MAIN away from interrupt vector table
+0003                  17     ORG 0003h               ; vector address for interrupt 0
+0003 02019B           18             LJMP ISR0       ; jump to ISR0
+0013                  19     ORG 0013h               ; vector address for interrupt 1
+0013 02019D           20             LJMP ISR1       ; jump to ISR1
+                      21     ;=================================================================
+                      22     ;Code segment
+                      23     ;=================================================================
+0100                  24     ORG 0100h                               ; MAIN starts here
+0100                  25     MAIN:
+0100 7590FF           26         MOV P1,#0ffh
+0103 75A0FF           27             MOV P2,#0ffh
+0106 75A885           28             MOV IE, #10000101B      ; enable external interrupts IE0, IE1
+0109 D288             29             SETB IT0                        ; negative edge trigger for interrupt 0
+010B D28A             30             SETB IT1                        ; negative edge trigger for interrupt 1
+010D 7802             31             MOV R0, #2                      ;Trang thai htai dèn, bd R0=0
+010F 754040           32             MOV 40h, #NUM_0         ;dat o dia chi 40h o trong RAM : dua gtri NUM_0 vao dia chi
+                              40 
+0112 754179           33             MOV 41h, #NUM_1                         ; NUM_x có giá tri o bang giá tri line 6->1
+                             5
+0115 754224           34             MOV 42h, #NUM_2
+0118 754330           35             MOV 43h, #NUM_3
+011B 754419           36             MOV 44h, #NUM_4
+011E 754512           37             MOV 45h, #NUM_5
+0121 754602           38             MOV 46h, #NUM_6
+0124 754778           39             MOV 47h, #NUM_7
+0127 754800           40             MOV 48h, #NUM_8
+012A 754910           41             MOV 49h, #NUM_9
+                      42     
+012D                  43     LOOP:
+                      44     
+012D E590             45         MOV A, P1
+012F B40009           46             CJNE A, #00h, CANCEL
+                      47     
+0132 E5A0             48             MOV A, P2
+0134 B4001B           49             CJNE A, #00h, ALARM
+                      50     
+0137 E8               51             MOV A, R0                       ; move data to A
+0138 33               52             RLC A           
+0139 5004             53             JNC BIGGER10    
+013B 7800             54     CANCEL: MOV R0, #0                      
+013D 8008             55             JMP DISPLAY
+013F                  56     BIGGER10:
+A51 MACRO ASSEMBLER  MAIN                                                                 05/02/2020 12:09:35 PAGE     2
+
+013F E8               57             MOV A, R0                       ; move data to A
+0140 C3               58             CLR C
+0141 940A             59             SUBB A, #10                      
+0143 4002             60             JC DISPLAY              
+0145 7809             61             MOV R0, #9              
+0147                  62     DISPLAY:                        
+0147 E8               63             MOV A, R0               
+0148 4440             64             ORL A, #40h             
+014A F9               65             MOV R1, A               
+014B 8780             66             MOV P0, @R1             
+014D 3163             67             CALL DELAY_1MS
+014F 02012D           68             LJMP LOOP                               ; end loop 
+                      69     
+0152                  70     ALARM:
+                      71                     
+0152 318B             72       TRU:CALL DIS
+0154 3184             73           CALL DELAY_1S
+0156 18               74               DEC R0
+0157 E8               75           MOV A,R0
+0158 B400F7           76           CJNE A, #0, TRU
+015B 318B             77        CALL DIS
+015D B40934           78        CJNE A, #9, COI        
+                      79                
+0160 02012D           80        LJMP LOOP
+                      81     
+                      82     ;============================================================
+                      83     ; ONE_MILLI_SUB
+                      84     ; Subroutine to delay ONE millisecond
+                      85     ; Uses and preserves R7
+                      86     ;============================================================
+0163                  87     DELAY_1MS:
+0163 C007             88             PUSH 07h                                ; save R7 to stack
+0165 7FFA             89             MOV R7, #250d                   ; 
+0167                  90     LOOP_1_MILLI:                           ; loops 250 times
+0167 00               91             NOP                                     ; two NOPs
+0168 00               92             NOP                                     ;
+0169 DFFC             93             DJNZ R7, LOOP_1_MILLI   ; loop until zero
+016B D007             94             POP 07h                                 ; restore R7 
+016D 22               95             RET                                     ; return to caller
+                      96     
+                      97     
+                      98     
+016E                  99     DELAY_50MS: 
+016E C2A9            100             CLR ET0
+0170 5389F0          101             ANL TMOD, #0F0h
+0173 438901          102             ORL TMOD, #01h
+0176 758C3C          103             MOV TH0, #3Ch
+0179 758AB0          104             MOV TL0, #0B0h
+017C C28D            105             CLR TF0
+017E D28C            106             SETB TR0
+0180                 107       WAIT_50MS:
+0180 308DFD          108         JNB TF0, WAIT_50MS
+0183 22              109             RET                                     ; return to caller
+                     110     
+0184                 111     DELAY_1S:
+0184 7A14            112             MOV R2,#20
+0186 316E            113             BACK: CALL DELAY_50MS
+0188 DAFC            114                       DJNZ R2, BACK 
+018A 22              115             RET
+018B                 116     DIS:                    
+018B E8              117             MOV A, R0               
+018C 4440            118             ORL A, #40h             
+018E F9              119             MOV R1, A               
+018F 8780            120             MOV P0, @R1
+0191 3163            121             CALL DELAY_1MS
+0193 22              122             RET
+A51 MACRO ASSEMBLER  MAIN                                                                 05/02/2020 12:09:35 PAGE     3
+
+                     123     
+0194                 124     COI: 
+0194 D287            125        SETB P0.7
+0196 3184            126        CALL DELAY_1S
+0198 02012D          127        LJMP LOOP
+                     128     ;==================================================================
+                     129     ; ISR0                                          Thanh Ghi R0 nhiem vu luu trang thái hien t
+                             ai biên dêm
+                     130     ;==================================================================
+019B                 131     ISR0:                     ;chuc nang tang bien dem
+019B 08              132             INC  R0                                 ; Increase data
+019C 32              133             RETI                                    ; return from interrupt
+                     134     ;==================================================================
+                     135     ; ISR1 
+                     136     ;==================================================================
+019D                 137     ISR1:                     ;chuc nang giam bien dem 
+019D 18              138             DEC R0                                  ; decrease value
+019E 32              139             RETI                                            ; return from interrupt
+                     140     ;==================================================================
+                     141     END                                             ; end of program
+A51 MACRO ASSEMBLER  MAIN                                                                 05/02/2020 12:09:35 PAGE     4
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ALARM. . . . . . .  C ADDR   0152H   A   
+BACK . . . . . . .  C ADDR   0186H   A   
+BIGGER10 . . . . .  C ADDR   013FH   A   
+CANCEL . . . . . .  C ADDR   013BH   A   
+COI. . . . . . . .  C ADDR   0194H   A   
+DELAY_1MS. . . . .  C ADDR   0163H   A   
+DELAY_1S . . . . .  C ADDR   0184H   A   
+DELAY_50MS . . . .  C ADDR   016EH   A   
+DIS. . . . . . . .  C ADDR   018BH   A   
+DISPLAY. . . . . .  C ADDR   0147H   A   
+ET0. . . . . . . .  B ADDR   00A8H.1 A   
+IE . . . . . . . .  D ADDR   00A8H   A   
+ISR0 . . . . . . .  C ADDR   019BH   A   
+ISR1 . . . . . . .  C ADDR   019DH   A   
+IT0. . . . . . . .  B ADDR   0088H.0 A   
+IT1. . . . . . . .  B ADDR   0088H.2 A   
+LED_DATA . . . . .  N NUMB   0040H   A   
+LOOP . . . . . . .  C ADDR   012DH   A   
+LOOP_1_MILLI . . .  C ADDR   0167H   A   
+MAIN . . . . . . .  C ADDR   0100H   A   
+NUM_0. . . . . . .  N NUMB   0040H   A   
+NUM_1. . . . . . .  N NUMB   0079H   A   
+NUM_2. . . . . . .  N NUMB   0024H   A   
+NUM_3. . . . . . .  N NUMB   0030H   A   
+NUM_4. . . . . . .  N NUMB   0019H   A   
+NUM_5. . . . . . .  N NUMB   0012H   A   
+NUM_6. . . . . . .  N NUMB   0002H   A   
+NUM_7. . . . . . .  N NUMB   0078H   A   
+NUM_8. . . . . . .  N NUMB   0000H   A   
+NUM_9. . . . . . .  N NUMB   0010H   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+TF0. . . . . . . .  B ADDR   0088H.5 A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TRU. . . . . . . .  C ADDR   0152H   A   
+WAIT_50MS. . . . .  C ADDR   0180H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

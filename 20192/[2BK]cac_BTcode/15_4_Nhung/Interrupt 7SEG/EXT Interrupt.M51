@@ -1,0 +1,109 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        04/15/2020  16:21:06  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+C:\TOOLS\KEIL\C51\BIN\BL51.EXE main.obj TO EXT Interrupt
+
+
+INPUT MODULES INCLUDED:
+  main.obj (MAIN)
+
+
+LINK MAP OF MODULE:  EXT Interrupt (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0151H     ABSOLUTE     
+
+
+
+SYMBOL TABLE OF MODULE:  EXT Interrupt (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:012FH         SYMBOL        BIGGER10
+  C:0142H         SYMBOL        DELAY_1MS
+  C:0137H         SYMBOL        DISPLAY
+  D:00A8H         SYMBOL        IE
+  C:014DH         SYMBOL        ISR0
+  C:014FH         SYMBOL        ISR1
+  B:0088H.0       SYMBOL        IT0
+  B:0088H.2       SYMBOL        IT1
+  N:0040H         SYMBOL        LED_DATA
+  C:0127H         SYMBOL        LOOP
+  C:0146H         SYMBOL        LOOP_1_MILLI
+  C:0100H         SYMBOL        MAIN
+  N:0040H         SYMBOL        NUM_0
+  N:0079H         SYMBOL        NUM_1
+  N:0024H         SYMBOL        NUM_2
+  N:0030H         SYMBOL        NUM_3
+  N:0019H         SYMBOL        NUM_4
+  N:0012H         SYMBOL        NUM_5
+  N:0002H         SYMBOL        NUM_6
+  N:0078H         SYMBOL        NUM_7
+  N:0000H         SYMBOL        NUM_8
+  N:0010H         SYMBOL        NUM_9
+  D:0080H         SYMBOL        P0
+  C:0000H         LINE#         20
+  C:0003H         LINE#         22
+  C:0013H         LINE#         24
+  C:0100H         LINE#         30
+  C:0103H         LINE#         31
+  C:0105H         LINE#         32
+  C:0107H         LINE#         33
+BL51 BANKED LINKER/LOCATER V6.22                                                      04/15/2020  16:21:06  PAGE 2
+
+
+  C:0109H         LINE#         34
+  C:010CH         LINE#         35
+  C:010FH         LINE#         36
+  C:0112H         LINE#         37
+  C:0115H         LINE#         38
+  C:0118H         LINE#         39
+  C:011BH         LINE#         40
+  C:011EH         LINE#         41
+  C:0121H         LINE#         42
+  C:0124H         LINE#         43
+  C:0127H         LINE#         45
+  C:0128H         LINE#         46
+  C:0129H         LINE#         47
+  C:012BH         LINE#         48
+  C:012DH         LINE#         49
+  C:012FH         LINE#         51
+  C:0130H         LINE#         52
+  C:0131H         LINE#         53
+  C:0133H         LINE#         54
+  C:0135H         LINE#         55
+  C:0137H         LINE#         57
+  C:0138H         LINE#         58
+  C:013AH         LINE#         59
+  C:013BH         LINE#         60
+  C:013DH         LINE#         61
+  C:013FH         LINE#         62
+  C:0142H         LINE#         69
+  C:0144H         LINE#         70
+  C:0146H         LINE#         72
+  C:0147H         LINE#         73
+  C:0148H         LINE#         74
+  C:014AH         LINE#         75
+  C:014CH         LINE#         76
+  C:014DH         LINE#         81
+  C:014EH         LINE#         82
+  C:014FH         LINE#         87
+  C:0150H         LINE#         88
+  -------         ENDMOD        MAIN
+
+******************************************************************************
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 005AH BYTE ( 4%) *
+******************************************************************************
+
+Program Size: data=8.0 xdata=0 code=337
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

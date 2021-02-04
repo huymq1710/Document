@@ -1,0 +1,6 @@
+Bai1: ExInterupt
+cong tac // t?
+- Nut ko bam, vtri dc keo len nguon => logic 1 => toi
+- Bam nút => có 1 suon am nhay xuong => logic 0 => den sáng
+- T?=> co che chong nay phím bang phan cung
++Phím cu, cung => nhayr nhieu => dien áp vào chan lien tuc => ctr ko chinh xác

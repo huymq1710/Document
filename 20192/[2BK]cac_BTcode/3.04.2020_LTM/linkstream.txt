@@ -1,0 +1,10 @@
+Viet file server de dang HTTP
+- Phan dau chua Telnet Sever Login
+- Phan sau lam bai HTTP file server: 
++ Tim hieu cau lenh co ban cua giao thuc HTTP
++ Viet 1 server HTTP
++ Tim hieu cach xly dlieu HTML
++ Tim hieu cach gui/nhan flie HTTP
+=> Ctr chay xong se dung duoc mang noi bo de chia se file giua cac thiet bi
+
+https://web.microsoftstream.com/video/bf5134ab-a430-4eea-b4e8-0a22ead35425

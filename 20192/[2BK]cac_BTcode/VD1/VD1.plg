@@ -1,0 +1,13 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+E:\1_tailieuBK\20192\[2BK]cac_BTcode\VD1\VD1.uvproj
+Project File Date:  03/25/2020
+
+<h2>Output:</h2>
+Build target 'Target 1'
+linking...
+Program Size: data=8.0 xdata=0 code=4
+"VD1" - 0 Error(s), 0 Warning(s).

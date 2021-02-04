@@ -1,0 +1,60 @@
+C51 COMPILER V9.01   CODE                                                                  10/11/2019 20:41:24 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE CODE
+OBJECT MODULE PLACED IN code.OBJ
+COMPILER INVOKED BY: C:\Tools\Keil\C51\BIN\C51.EXE code.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg51.h>
+   2          
+   3          sbit Out = P2^0;                   
+   4          
+   5          void InitTimer0(void);
+   6          
+   7          
+   8          int main(void)
+   9          {
+  10   1         InitTimer0();           
+  11   1       
+  12   1         while(1)                
+  13   1         {
+  14   2         }
+  15   1      }
+  16          
+  17          void InitTimer0(void)
+  18          {
+  19   1              TMOD &= 0xF0;    
+  20   1              TMOD |= 0x02;    
+  21   1              
+  22   1              TH0 = 0x05;      
+  23   1              TL0 = 0x05;      
+  24   1              
+  25   1              ET0 = 1;         
+  26   1              EA  = 1;         
+  27   1              
+  28   1              TR0 = 1;         
+  29   1      }
+  30          
+  31          
+  32          void Timer0_ISR (void) interrupt 1   
+  33          {
+  34   1              Out = ~Out;  
+  35   1              TF0 = 0;     
+  36   1      }
+  37          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     29    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

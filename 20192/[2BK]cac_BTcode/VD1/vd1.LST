@@ -1,0 +1,28 @@
+A51 MACRO ASSEMBLER  VD1                                                                  03/25/2020 17:11:09 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02
+OBJECT MODULE PLACED IN vd1.OBJ
+ASSEMBLER INVOKED BY: C:\Tools\Keil\C51\BIN\A51.EXE vd1.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1                     ORG 000
+0000 E501              2                     MOV A, 01H
+0002 80FE              3     LOOP:   SJMP LOOP
+                       4                     END
+A51 MACRO ASSEMBLER  VD1                                                                  03/25/2020 17:11:09 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+LOOP . . . . . . .  C ADDR   0002H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

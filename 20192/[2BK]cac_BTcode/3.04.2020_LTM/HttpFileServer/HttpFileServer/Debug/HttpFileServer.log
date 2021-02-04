@@ -1,0 +1,4 @@
+﻿  HttpFileServer.cpp
+E:\1_tailieuBK\20192\[2BK]cac_BTcode\3.04.2020_LTM\HttpFileServer\HttpFileServer\HttpFileServer.cpp(119,18): warning C4018: '<': signed/unsigned mismatch
+E:\1_tailieuBK\20192\[2BK]cac_BTcode\3.04.2020_LTM\HttpFileServer\HttpFileServer\HttpFileServer.cpp(256,1): warning C4326: return type of 'main' should be 'int' instead of 'void'
+  HttpFileServer.vcxproj -> E:\1_tailieuBK\20192\[2BK]cac_BTcode\3.04.2020_LTM\HttpFileServer\Debug\HttpFileServer.exe

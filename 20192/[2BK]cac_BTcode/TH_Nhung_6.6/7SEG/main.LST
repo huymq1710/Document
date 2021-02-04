@@ -1,0 +1,160 @@
+C51 COMPILER V9.01   MAIN                                                                  06/13/2020 13:14:32 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <at89x51.h>
+   2          #include "string.h"
+   3          
+   4          
+   5          char uart_data;
+   6          char message[20];
+   7          int index=0;
+   8          
+   9          //Dinh nghia mot so chan de dieu khien den LCD
+  10          #define LCD_DATA P0
+  11          sbit EN=P1^2;
+  12          sbit RS=P1^0;
+  13          sbit RW=P1^1;      
+  14          //Khai bao prototype cho cac ham
+  15          void Init_System();     
+  16          void Delay_ms(int interval);  
+  17          void LCD_init();
+  18          void Wait_For_LCD();
+  19          void LCD_Send_Command(unsigned char x);
+  20          void LCD_Write_One_Char(unsigned char c);
+  21          void LCD_Write_String(unsigned char *s);
+  22          
+  23          void write(char c){
+  24   1              //LCD_Send_Command(0x01);
+  25   1              //LCD_Write_String(s);
+  26   1              if(c=='1'){
+  27   2                      LCD_Send_Command(0x01);
+  28   2              }else   if(c=='2'){
+  29   2                      LCD_Send_Command(0xC0);
+  30   2              }else{
+  31   2                      LCD_Write_One_Char(c);
+  32   2              }
+  33   1              //LCD_Send_Command(0xC0); //Chuyen con tro xuong dong thu 2
+  34   1              //LCD_Write_String("***************");
+  35   1      }
+  36          
+  37          void init_uart(){
+  38   1              SCON = 0x50;                    /* uart in mode 1 (8 bit), REN=1 */
+  39   1              TMOD = TMOD | 0x20 ;    /* Timer 1 in mode 2 */
+  40   1              TH1 = 0xFD;                     /* 9600 Bds at 11.0592MHz */
+  41   1              TL1 = 0xFD;                     /* 9600 Bds at 11.0592MHz */
+  42   1              ES = 1;                                 /* Enable serial interrupt*/
+  43   1              EA = 1;                                 /* Enable global interrupt */
+  44   1              TR1 = 1;
+  45   1      }
+  46          
+  47          void serial_IT(void) interrupt 4
+  48          {
+  49   1        if (RI == 1)
+  50   1        { 
+  51   2              RI = 0;                         /* prepare for next reception */
+  52   2          uart_data = SBUF;   /* Read receive data */
+  53   2          SBUF = uart_data;   /* Send back same data on uart*/
+  54   2              write(uart_data);
+  55   2        }
+C51 COMPILER V9.01   MAIN                                                                  06/13/2020 13:14:32 PAGE 2   
+
+  56   1        else 
+  57   1          TI = 0;                     /* if emission occur */
+  58   1      }
+  59          
+  60          void main()
+  61          {
+  62   1              init_uart();
+  63   1              Init_System();
+  64   1              LCD_init();
+  65   1              while(1){               
+  66   2              }
+  67   1      }
+  68          
+  69          
+  70          
+  71          void Init_System()
+  72          {
+  73   1              //Thiet lap LCD o che do doc
+  74   1              RW=1;   
+  75   1      }
+  76          void Delay_ms(int interval)
+  77          {
+  78   1              int i,j;
+  79   1              for(i=0;i<1000;i++)
+  80   1              {
+  81   2                      for(j=0;j<interval;j++);
+  82   2              }
+  83   1      }
+  84          //Ham thuc hien gui mot lenh xuong LCD
+  85          void LCD_Send_Command(unsigned char x)
+  86          {
+  87   1              LCD_DATA=x;
+  88   1              RS=0; //Chon thanh ghi lenh
+  89   1              RW=0; //De ghi du lieu
+  90   1              EN=1;
+  91   1              Delay_ms(1);
+  92   1              EN=0;           
+  93   1              Wait_For_LCD(); //Doi cho LCD san sang
+  94   1              EN=1;             
+  95   1      }
+  96          //Ham kiem tra va cho den khi LCD san sang
+  97          void Wait_For_LCD()
+  98          {
+  99   1              Delay_ms(10);
+ 100   1      }
+ 101          void LCD_init()
+ 102          {
+ 103   1              LCD_Send_Command(0x38); //Chon che do 8 bit, 2 hang cho LCD
+ 104   1              LCD_Send_Command(0x0E); //Bat hien thi, nhap nhay con tro       
+ 105   1              LCD_Send_Command(0x01); //Xoa man hinh  
+ 106   1              LCD_Send_Command(0x80); //Ve dau dong
+ 107   1              
+ 108   1      }
+ 109          //Ham de LCD hien thi mot ky tu
+ 110          void LCD_Write_One_Char(unsigned char c)
+ 111          {
+ 112   1              LCD_DATA=c; //Dua du lieu vao thanh ghi 
+ 113   1              RS=1; //Chon thanh ghi du lieu
+ 114   1              RW=0;
+ 115   1              EN=1;
+ 116   1              Delay_ms(1);    
+ 117   1              EN=0;
+C51 COMPILER V9.01   MAIN                                                                  06/13/2020 13:14:32 PAGE 3   
+
+ 118   1              Wait_For_LCD(); 
+ 119   1              EN=1;
+ 120   1      }
+ 121          //Ham de LCD hien thi mot xau
+ 122          void LCD_Write_String(unsigned char *s)
+ 123          {
+ 124   1              unsigned char length;
+ 125   1              length=strlen(s); //Lay do dai xau
+ 126   1              while(length!=0)
+ 127   1              {
+ 128   2                      LCD_Write_One_Char(*s); //Ghi ra LCD gia tri duoc tro boi con tro
+ 129   2                      s++; //Tang con tro
+ 130   2                      length--;                        
+ 131   2              }
+ 132   1      }
+ 133          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    278    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     23       5
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
